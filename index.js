@@ -3,11 +3,12 @@ const mysql = require("mysql2");
 const app = express();
 const port = 3000;
 
+require('dotenv').config();
+
 const router = require("./routes/index.route");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 router(app);
 
