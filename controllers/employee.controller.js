@@ -54,11 +54,6 @@ module.exports.transferMoney = async (req, res) => {
         let sql = "INSERT INTO employees VALUES ";
         sql += `('${employee[0].employee_id}', '${employee[0].name}', '${employee[0].salary}', '${employee[0].department_id}'); `;
         const [newEmployee] = await conn.query(sql);
-        console.log(newEmployee.insertId);
-
-        // // select employee tranfer
-        // const sqlSelectEmployee = `SELECT * FROM employees WHERE employee_id = '${userId}'; `;
-        // const userTranfer = await conn.query(sqlSelectEmployee);
         
         //update money of employee tranfer money
         const sqlEmployeeTranfer = `UPDATE employees SET employees.salary = employees.salary - ? WHERE employees.employee_id = ?`;
@@ -84,6 +79,26 @@ module.exports.transferMoney = async (req, res) => {
         })
     }
     
+}
+
+module.exports.deleteEmployee = async (req, res) => {
+    try {
+        const conn = await connection.connection();
+        const employeeId = req.params.id;
+        console.log(employeeId);
+        const sql = `DELETE FROM employees WHERE employee_id = ?`
+        await conn.query(sql, [employeeId]);
+        res.json({
+            code: 200,
+            message: "Success!",
+        })
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Error!",
+            error: error
+        })
+    }
 }
 
 
