@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url=env("DATABASE_URL")
+}
+
+model employees {
+  employee_id  String     @id
+  name         String    db.VarChar(255)
+  salary       String    db.VarChar(255)
+  department_id String
+  department   department @relation(fields: [department_id], references: [department_id])
+  salary_history salary_history[]
+}
+
+model department {
+  department_id   String      @id
+  department_name String
+  employees       employees[]
+}
+
+
+model salary_history {
+  salary_history_id String @id
+  salary            String
+  employee_id       String
+  employees          employees @relation(fields: [employee_id], references: [employee_id])
+}
+
+
+

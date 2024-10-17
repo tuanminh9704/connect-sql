@@ -7,7 +7,7 @@ module.exports.genarateMockEmployees = (length) => {
         mockData.push({
             employee_id: "NV" + randomCharecter + randomNumber,
             name: "Nguyen Van " + randomCharecter,
-            salary: Math.floor(Math.random() * (10000 - 1000 + 1) + 1000),
+            salary: (Math.floor(Math.random() * (10000 - 1000 + 1) + 1000)).toString(),
             department_id: 'P1' ,
             // age: 20
         })
