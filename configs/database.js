@@ -1,15 +1,14 @@
-const mysql = require("mysql2");
+const mysql = require("mysql2/promise");
 
-const conn = mysql.createConnection({
-    host: process.env.HOST,
-    user: process.env.MY_SQL_USER_NAME,
-    password: process.env.MY_SQL_PASSWORD,
-    database: process.env.DATABASE_NAME
-})
+module.exports.connection = async () => {
+    const connection = await mysql.createConnection({
+        host: process.env.HOST,
+        user: process.env.MY_SQL_USER_NAME,
+        password: process.env.MY_SQL_PASSWORD,
+        database: process.env.DATABASE_NAME,
+        multipleStatements: true,
+    })
+    // console.log(connection);
+    return connection;
 
-conn.connect((err) => {
-    if (err) throw err;
-    console.log("Connected!");
-});
-
-module.exports = conn;
+}

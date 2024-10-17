@@ -1,6 +1,8 @@
 const { query } = require("express");
-const conn = require("../configs/database");
+const connection = require("../configs/database");
 const randomMockData = require("../helpers/randomMockData");
+const { get } = require("../routes/employee.route");
+
 
 module.exports.index = (req, res) => {
     const sql = "SELECT * FROM employees ?";
@@ -16,7 +18,8 @@ module.exports.index = (req, res) => {
     })
 }
 
-module.exports.insert = (req, res) => {
+module.exports.insert = async (req, res) => {
+    const conn = await connection.connection();
     const employees = randomMockData.genarateMockEmployees(10);
     const values = employees.map(item => [item.employee_id, item.name, item.salary.toString(), item.department_id]);
     let sql = "INSERT INTO employees (employee_id, name, salary, department_id) VALUES ?";
@@ -37,47 +40,59 @@ module.exports.insert = (req, res) => {
 }
 
 module.exports.transferMoney = async (req, res) => {
+    const conn = await connection.connection();
     const userId = req.params.id;
     const employee = randomMockData.genarateMockEmployees(1);
     const values = employee.map(item => [item.employee_id, item.name, item.salary.toString(), item.department_id]);
-    let sql = "START TRANSACTION; INSERT INTO employees (employee_id, name, salary, department_id) VALUES ";
-    const money = 6500;
-    const sqlSelectEmployee = `SELECT * FROM employees WHERE employees.employee_id = '${userId}'; `; 
-    
-    sql += `('${employee[0].employee_id}', '${employee[0].name}', '${employee[0].salary}', '${employee[0].department_id}'), `;
-    sql = sql.substring(0, sql.length - 2) + "; ";
+    const money = 500;
 
-    sql += `UPDATE employees SET employees.salary = employees.salary - ${money} WHERE employees.employee_id = '${userId}';
-            UPDATE employees SET employees.salary = employees.salary + ${money} WHERE employees.employee_id = '${employee[0].employee_id}'; `;
+    //start begintransaction
+    await conn.beginTransaction();
 
-    conn.query(sqlSelectEmployee, (err, result, fields) => {
-        if(err){
-            throw err;
-        }
-        else{
-            if(parseInt(result[0].salary) >= money){
-                sql += "COMMIT; "
-                console.log("OK");
-            }
-            else{
-                sql += " ROLLBACK; ";
-            }
-        }
-        conn.query(sql, (err, result, fields) => {
-            // if(err){
-            //     throw err;
-            // }
-            res.json({
-                code: 200,
-                message: "success!"
-            })
+    try {
+        // insert new employee
+        let sql = "INSERT INTO employees VALUES ";
+        sql += `('${employee[0].employee_id}', '${employee[0].name}', '${employee[0].salary}', '${employee[0].department_id}'); `;
+        const [newEmployee] = await conn.query(sql);
+        console.log(newEmployee.insertId);
+
+        // // select employee tranfer
+        // const sqlSelectEmployee = `SELECT * FROM employees WHERE employee_id = '${userId}'; `;
+        // const userTranfer = await conn.query(sqlSelectEmployee);
+        
+        //update money of employee tranfer money
+        const sqlEmployeeTranfer = `UPDATE employees SET employees.salary = employees.salary - ? WHERE employees.employee_id = ?`;
+        await conn.query(sqlEmployeeTranfer, [money, userId]);
+
+        // update money of employee receive
+        const employeeReceiveId = newEmployee.insertId.toString();
+        const sqlEmployeeReceive = `UPDATE employees SET employees.salary = employees.salary - ? WHERE employees.employee_id = ?`;
+        await conn.query(sqlEmployeeReceive, [money, employeeReceiveId]);
+
+        res.json({
+            code: 200,
+            message: "Success!"
         })
-    })
-
-    // const {row} =  conn.query(sqlSelectEmployee);
+        // commit 
+        await conn.commit();
+    } catch (error) {
+        await conn.rollback();
+        // console.log(sql);
+        res.json({
+            code: 500,
+            message: "Error!"
+        })
+    }
     
-
 }
+
+
+
+
+
+
+
+
 
 
 
