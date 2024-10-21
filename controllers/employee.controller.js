@@ -124,24 +124,19 @@ module.exports.findEmployees = async (req, res) => {
     try {
         const employeesName = req.query.name;
         const currentPage = parseInt(req.query.currentPage);
-        let employeesLimit = parseInt(req.query.employeesLimit);
-        const limit = 3;
-
-        if(employeesLimit > limit){
-            employeesLimit = limit
-        }
+        const pageSize = parseInt(req.query.employeesLimit);
+        const offset = (currentPage - 1) * pageSize;
 
         const employees = await prisma.employees.findMany({
-            take: employeesLimit,
-            skip: parseInt((currentPage - 1) * limit),
+            take: pageSize,
+            skip: offset,
             where: {
                 name: {
                     contains: employeesName 
                 }
             },
         });
-        
-        // console.log(employees);
+
         res.json({
             code: 200,
             data: {
@@ -155,9 +150,12 @@ module.exports.findEmployees = async (req, res) => {
             message: "Error",
             error: error
         })
+        console.log(error)
     }
 
 }
+
+
 
 
 
