@@ -11,4 +11,6 @@ router.post("/transfer/:id", controller.transferMoney);
 
 router.delete("/delete/:id", controller.deleteEmployee);
 
+router.get("/find-employees", controller.findEmployees);
+
 module.exports = router;

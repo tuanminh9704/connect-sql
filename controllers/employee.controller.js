@@ -120,6 +120,45 @@ module.exports.deleteEmployee = async (req, res) => {
     }
 }
 
+module.exports.findEmployees = async (req, res) => {
+    try {
+        const employeesName = req.query.name;
+        const currentPage = parseInt(req.query.currentPage);
+        let employeesLimit = parseInt(req.query.employeesLimit);
+        const limit = 3;
+
+        if(employeesLimit > limit){
+            employeesLimit = limit
+        }
+
+        const employees = await prisma.employees.findMany({
+            take: employeesLimit,
+            skip: parseInt((currentPage - 1) * limit),
+            where: {
+                name: {
+                    contains: employeesName 
+                }
+            },
+        });
+        
+        // console.log(employees);
+        res.json({
+            code: 200,
+            data: {
+                currentPage: currentPage,
+                totalRecord: employees.length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            message: "Error",
+            error: error
+        })
+    }
+
+}
+
 
 
 
