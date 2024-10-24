@@ -122,7 +122,7 @@ module.exports.deleteEmployee = async (req, res) => {
 
 module.exports.findEmployees = async (req, res) => {
     try {
-        const employeesName = req.query.name;
+        const employeesName = req.query.name    
         const currentPage = parseInt(req.query.currentPage);
         const pageSize = parseInt(req.query.employeesLimit);
         const offset = (currentPage - 1) * pageSize;
@@ -154,21 +154,4 @@ module.exports.findEmployees = async (req, res) => {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
